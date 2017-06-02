@@ -53,7 +53,6 @@ defmodule WikiCrawl do
     print_path(visited)
     IO.puts ""    
 
-
     IO.puts "Visiting " <> url
 
     r = HTTPotion.get link, [follow_redirects: true]
@@ -88,18 +87,6 @@ defmodule WikiCrawl do
       String.contains?(link, "#") -> String.split(link, "#") |> hd
       true -> link
     end
-  end
-
-  defp remove_italics(html_tree) do
-    Floki.filter_out(html_tree, "i")
-  end
-
-  defp remove_tables(html_tree) do
-    Floki.filter_out(html_tree, "table")
-  end
-
-  defp remove_scripts(html_tree) do
-    Floki.filter_out(html_tree, "script")
   end
 
   defp remove_parens(html_string) do
