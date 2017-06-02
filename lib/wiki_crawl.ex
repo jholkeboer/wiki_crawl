@@ -11,6 +11,8 @@ defmodule WikiCrawl do
   defp crawl([url | visited]) do
     if is_philosophy(url) do
       IO.puts "Found Philosophy page! " <> url
+      count = length(visited)
+      IO.puts "Crawled #{count} pages."
     else
       visit_page([url | visited]) |> crawl
     end
