@@ -60,9 +60,10 @@ defmodule WikiCrawl do
     next = (r
     |> remove_parens 
     |> parse_html 
-    |> remove_italics 
-    |> remove_tables 
-    |> remove_scripts
+    |> Floki.filter_out("i")
+    |> Floki.filter_out("table")
+    |> Floki.filter_out("script")
+    |> Floki.filter_out(".hatnote")
     |> Floki.find("#mw-content-text") 
     |> Floki.find("a")
     |> Floki.attribute("href")
