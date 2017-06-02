@@ -11,11 +11,7 @@ defmodule WikiCrawl do
   defp crawl([url | visited]) do
     if is_philosophy(url) do
       IO.puts "Found Philosophy page! " <> url
-      IO.puts "Here is the path we followed: "
-      print_path(visited)
     else
-      # [next_link newly_visited] = visit_page(url, visited)
-      # crawl(next_link, newly_visited)
       visit_page([url | visited]) |> crawl
     end
   end
@@ -34,7 +30,7 @@ defmodule WikiCrawl do
   defp visit_page([url | visited]) do
     valid_link? = fn(url) -> 
       not (
-        url in visited or
+        build_complete_url(url) in visited or
         String.contains?(url, "#cite_note") or
         String.contains?(url, "redlink=1") or
         String.contains?(url, "action=edit") or
@@ -42,19 +38,22 @@ defmodule WikiCrawl do
         String.contains?(url, "Special:") or
         String.contains?(url, "Help:") or
         String.contains?(url, "Wiktionary") or
+        String.contains?(url, "Wikipedia:") or
         not String.starts_with?(url, "/wiki")
       )
     end
-    
-    IO.puts "Visiting " <> url
 
-    link = 
-      cond do
-        String.starts_with?(url, "/wiki") -> "https://en.wikipedia.org" <> url
-        true -> url
-      end
+    link = build_complete_url(url)
 
     visited = add_link_to_visited(visited, link)
+
+    IO.puts "Visited so far:"
+    print_path(visited)
+    IO.puts ""    
+
+
+    IO.puts "Visiting " <> url
+
     r = HTTPotion.get link, [follow_redirects: true]
     r = r.body 
 
@@ -75,6 +74,17 @@ defmodule WikiCrawl do
 
   defp parse_html(html) do
     Floki.parse(html)
+  end
+
+  def build_complete_url(url) do
+    link = cond do
+      String.starts_with?(url, "/wiki") -> "https://en.wikipedia.org" <> url
+      true -> url
+    end
+    cond do
+      String.contains?(link, "#") -> String.split(link, "#") |> hd
+      true -> link
+    end
   end
 
   defp remove_italics(html_tree) do
